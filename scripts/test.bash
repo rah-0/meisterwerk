@@ -7,4 +7,4 @@ cd "$(dirname "$0")/.."
 
 # Clear cache and run test
 go clean -testcache
-go test ./... -v -race -covermode=atomic
+go test ./... -v -race -covermode=atomic -p=1 -parallel=1

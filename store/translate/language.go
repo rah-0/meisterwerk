@@ -32,15 +32,15 @@ func (s *LanguageStore) Insert(l model.Language) error {
 	return nil
 }
 
-func (s *LanguageStore) Get(uuid string) (model.Language, bool) {
+func (s *LanguageStore) Get(uuid string) (model.Language, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	l, ok := s.items[uuid]
 	if !ok {
-		return model.Language{}, false
+		return model.Language{}, errors.New("language not found")
 	}
-	return l, true
+	return l, nil
 }
 
 func (s *LanguageStore) List() []model.Language {

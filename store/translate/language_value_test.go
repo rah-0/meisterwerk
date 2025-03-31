@@ -27,9 +27,9 @@ func TestLanguageValueStore_InsertAndGet(t *testing.T) {
 		t.Fatalf("Insert failed: %v", err)
 	}
 
-	got, ok := store.Get(id)
-	if !ok {
-		t.Fatal("Get failed: value not found")
+	got, err := store.Get(id)
+	if err != nil {
+		t.Fatalf("Get failed: %v", err)
 	}
 	if got.Uuid != id || got.Value != val {
 		t.Errorf("Retrieved value mismatch: got %+v, want %+v", got, v)
@@ -53,8 +53,9 @@ func TestLanguageValueStore_InsertDuplicate(t *testing.T) {
 func TestLanguageValueStore_Get_NotFound(t *testing.T) {
 	store := NewLanguageValueStore()
 
-	if _, ok := store.Get("not-found"); ok {
-		t.Error("Expected Get to return false on missing UUID")
+	_, err := store.Get("not-found")
+	if err == nil {
+		t.Error("Expected error on Get for nonexistent value")
 	}
 }
 
@@ -70,9 +71,21 @@ func TestLanguageValueStore_List(t *testing.T) {
 		})
 	}
 
-	list := store.List()
+	list, err := store.List()
+	if err != nil {
+		t.Fatalf("List failed: %v", err)
+	}
 	if len(list) != 3 {
 		t.Errorf("Expected 3 items in List, got %d", len(list))
+	}
+}
+
+func TestLanguageValueStore_List_Empty(t *testing.T) {
+	store := NewLanguageValueStore()
+
+	_, err := store.List()
+	if err == nil {
+		t.Error("Expected error when listing empty store")
 	}
 }
 
@@ -132,8 +145,8 @@ func TestLanguageValueStore_Delete(t *testing.T) {
 		t.Fatalf("Delete failed: %v", err)
 	}
 
-	if _, ok := store.Get(id); ok {
-		t.Error("Expected item to be deleted")
+	if _, err := store.Get(id); err == nil {
+		t.Error("Expected error after deletion")
 	}
 }
 

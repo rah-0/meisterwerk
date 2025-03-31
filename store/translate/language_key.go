@@ -38,24 +38,30 @@ func (s *LanguageKeyStore) Insert(k model.LanguageKey) error {
 	return nil
 }
 
-func (s *LanguageKeyStore) Get(uuid string) (model.LanguageKey, bool) {
+func (s *LanguageKeyStore) Get(uuid string) (model.LanguageKey, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	k, ok := s.items[uuid]
-	return k, ok
+	if !ok {
+		return model.LanguageKey{}, errors.New("key not found")
+	}
+	return k, nil
 }
 
-func (s *LanguageKeyStore) GetByValue(value string) (model.LanguageKey, bool) {
+func (s *LanguageKeyStore) GetByValue(value string) (model.LanguageKey, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	uuid, ok := s.byValue[value]
 	if !ok {
-		return model.LanguageKey{}, false
+		return model.LanguageKey{}, errors.New("key not found")
 	}
 	k, exists := s.items[uuid]
-	return k, exists
+	if !exists {
+		return model.LanguageKey{}, errors.New("key not found")
+	}
+	return k, nil
 }
 
 func (s *LanguageKeyStore) List() []model.LanguageKey {

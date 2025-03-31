@@ -32,23 +32,30 @@ func (s *LanguageValueStore) Insert(v model.LanguageValue) error {
 	return nil
 }
 
-func (s *LanguageValueStore) Get(uuid string) (model.LanguageValue, bool) {
+func (s *LanguageValueStore) Get(uuid string) (model.LanguageValue, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	v, ok := s.items[uuid]
-	return v, ok
+	if !ok {
+		return model.LanguageValue{}, errors.New("value not found")
+	}
+	return v, nil
 }
 
-func (s *LanguageValueStore) List() []model.LanguageValue {
+func (s *LanguageValueStore) List() ([]model.LanguageValue, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
+
+	if len(s.items) == 0 {
+		return nil, errors.New("no values found")
+	}
 
 	out := make([]model.LanguageValue, 0, len(s.items))
 	for _, v := range s.items {
 		out = append(out, v)
 	}
-	return out
+	return out, nil
 }
 
 func (s *LanguageValueStore) Update(uuid string, updated model.LanguageValue) error {

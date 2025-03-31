@@ -25,9 +25,9 @@ func TestLanguageStore_InsertAndGet(t *testing.T) {
 		t.Fatalf("Insert failed: %v", err)
 	}
 
-	got, ok := store.Get(id)
-	if !ok {
-		t.Fatal("Get failed: language not found")
+	got, err := store.Get(id)
+	if err != nil {
+		t.Fatalf("Get failed: %v", err)
 	}
 
 	if got.Uuid != lang.Uuid || got.Lang != lang.Lang {
@@ -53,9 +53,9 @@ func TestLanguageStore_InsertDuplicate(t *testing.T) {
 func TestLanguageStore_Get_NotFound(t *testing.T) {
 	store := NewLanguageStore()
 
-	_, ok := store.Get("nonexistent-id")
-	if ok {
-		t.Error("Expected not found result for Get")
+	_, err := store.Get("nonexistent-id")
+	if err == nil {
+		t.Error("Expected error for Get with nonexistent ID")
 	}
 }
 
@@ -115,7 +115,7 @@ func TestLanguageStore_Delete(t *testing.T) {
 		t.Fatalf("Delete failed: %v", err)
 	}
 
-	if _, ok := store.Get(id); ok {
+	if _, err := store.Get(id); err == nil {
 		t.Error("Expected deleted language to be gone")
 	}
 }

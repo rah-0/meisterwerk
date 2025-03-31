@@ -3,13 +3,17 @@ package model
 import (
 	"bytes"
 	"encoding/gob"
+	"reflect"
 	"sync"
 )
 
 func init() {
-	preloadGob(&Language{})
-	preloadGob(&LanguageKey{})
-	preloadGob(&LanguageValue{})
+	PreloadGob(Language{})
+	PreloadGob([]Language{})
+	PreloadGob(LanguageKey{})
+	PreloadGob([]LanguageKey{})
+	PreloadGob(LanguageValue{})
+	PreloadGob([]LanguageValue{})
 }
 
 var (
@@ -18,6 +22,19 @@ var (
 	encoder = gob.NewEncoder(buffer)
 	decoder = gob.NewDecoder(buffer)
 )
+
+func SetBytes(b []byte) {
+	mu.Lock()
+	defer mu.Unlock()
+	buffer.Reset()
+	buffer.Write(b)
+}
+
+func GetBytes() []byte {
+	mu.Lock()
+	defer mu.Unlock()
+	return buffer.Bytes()
+}
 
 func Encode(a any) error {
 	mu.Lock()
@@ -40,13 +57,17 @@ func BufferReset() {
 	buffer.Reset()
 }
 
-func preloadGob(x any) {
+func PreloadGob(x any) {
 	gob.Register(x)
+
 	if err := Encode(x); err != nil {
 		panic("failed to encode type metadata: " + err.Error())
 	}
-	if err := Decode(x); err != nil {
+
+	decoded := reflect.New(reflect.TypeOf(x)).Interface()
+	if err := Decode(decoded); err != nil {
 		panic("failed to decode type metadata: " + err.Error())
 	}
+
 	BufferReset()
 }

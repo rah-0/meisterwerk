@@ -22,9 +22,9 @@ func TestLanguageKeyStore_InsertAndGet(t *testing.T) {
 		t.Fatalf("Insert failed: %v", err)
 	}
 
-	got, ok := store.Get(id)
-	if !ok {
-		t.Fatal("Get failed: key not found")
+	got, err := store.Get(id)
+	if err != nil {
+		t.Fatalf("Get failed: %v", err)
 	}
 	if got.Uuid != id || got.Value != val {
 		t.Errorf("Get returned wrong key: got %+v, want %+v", got, key)
@@ -69,9 +69,9 @@ func TestLanguageKeyStore_GetByValue(t *testing.T) {
 		t.Fatalf("Insert failed: %v", err)
 	}
 
-	got, ok := store.GetByValue(val)
-	if !ok {
-		t.Fatal("GetByValue failed: key not found")
+	got, err := store.GetByValue(val)
+	if err != nil {
+		t.Fatalf("GetByValue failed: %v", err)
 	}
 	if got.Value != val {
 		t.Errorf("Expected value %s, got %s", val, got.Value)
@@ -108,7 +108,10 @@ func TestLanguageKeyStore_Update(t *testing.T) {
 		t.Fatalf("Update failed: %v", err)
 	}
 
-	got, _ := store.Get(id)
+	got, err := store.Get(id)
+	if err != nil {
+		t.Fatalf("Get failed after update: %v", err)
+	}
 	if got.Value != "after" {
 		t.Errorf("Expected value 'after', got %s", got.Value)
 	}
@@ -140,11 +143,11 @@ func TestLanguageKeyStore_Delete(t *testing.T) {
 		t.Fatalf("Delete failed: %v", err)
 	}
 
-	if _, ok := store.Get(id); ok {
+	if _, err := store.Get(id); err == nil {
 		t.Error("Expected key to be deleted")
 	}
 
-	if _, ok := store.GetByValue("deletable"); ok {
+	if _, err := store.GetByValue("deletable"); err == nil {
 		t.Error("Expected value mapping to be removed")
 	}
 }

@@ -13,7 +13,7 @@ func TestGobConcurrentEncodingDecoding(t *testing.T) {
 	var goroutines = runtime.NumCPU()
 	var wg sync.WaitGroup
 
-	lang := &Language{
+	lang := Language{
 		Uuid:   uuid.NewString(),
 		Prefix: "en-US",
 		Lang:   "English",
@@ -38,8 +38,6 @@ func TestGobConcurrentEncodingDecoding(t *testing.T) {
 			if decoded.Prefix != lang.Prefix || decoded.Lang != lang.Lang {
 				t.Errorf("goroutine %d: decoded mismatch: got %+v, want %+v", id, decoded, lang)
 			}
-
-			BufferReset()
 		}(i)
 	}
 
